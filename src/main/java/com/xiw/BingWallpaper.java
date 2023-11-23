@@ -1,0 +1,98 @@
+package com.xiw;
+
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
+import com.xiw.bean.Image;
+import com.xiw.bean.Response;
+
+import java.io.File;
+import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class BingWallpaper {
+
+    private static final List<String> AREA_LIST = Arrays.asList("ar", "at", "au", "be", "br", "ca", "ch", "cl", "cn",
+            "de", "dk", "es", "fi", "fr", "hk", "ie", "in", "it", "jp", "kr", "nl", "no", "nz", "ph", "pt", "ru", "se",
+            "sg", "tw", "uk");
+
+    public static void main(String[] args) {
+        List<Image> allImages = getAllImages();
+        downloadImages(allImages);
+    }
+
+    private static void downloadImages(List<Image> allImages) {
+        allImages.stream().filter(BingWallpaper::filterImage).forEach(image -> {
+            File file = getFile(image);
+            String url = getUHDUrl(image);
+            System.out.println("download:" + file.getName());
+            doDownload(file, url);
+        });
+    }
+
+    private static boolean filterImage(Image image) {
+        boolean isSpecial = !image.isWp() || "zh-CN".equals(image.getMkt());
+        boolean isExist = getFile(image).exists();
+        return isSpecial && !isExist;
+    }
+
+    private static void doDownload(File file, String url) {
+        if (!file.exists()) {
+            FileUtil.touch(file.getAbsolutePath());
+        }
+        HttpUtil.download(url, FileUtil.getOutputStream(file), true);
+    }
+
+    private static String getUHDUrl(Image image) {
+        String urlPrefix = "https://www.bing.com/";
+        String urlbase = image.getUrlbase();
+        return CharSequenceUtil.format("{}{}_UHD.jpg", urlPrefix, urlbase);
+    }
+
+    private static File getFile(Image image) {
+        String fileName = CharSequenceUtil.format("{}_{}.jpg", image.getEnddate(), image.getUrlbase()
+                .split("th\\?id=OHR.")[1]);
+        String mkt = image.getMkt();
+        String dirPath = "./resources/uhd/" + mkt + File.separator;
+        File file = new File(dirPath + fileName);
+        return file;
+    }
+
+    private static void setMkt(Response response) {
+        String mkt = response.getMarket().getMkt();
+        response.getImages().forEach(e -> e.setMkt(mkt));
+    }
+
+    private static List<String> buildUrlList() {
+        List<String> urlList = new ArrayList<>();
+        AREA_LIST.forEach(area -> {
+            String url = "https://www.bing.com/HPImageArchive.aspx?format=js&pid=hp&og=1&idx=0&n=8&&mbl=1&cc=" + area;
+            urlList.add(url);
+        });
+        return urlList;
+    }
+
+    private static List<Image> getAllImages() {
+        List<String> urlList = buildUrlList();
+        return urlList.stream().map(url -> {
+            String result = HttpUtil.get(url);
+            Response response = JSONUtil.toBean(result, Response.class);
+            setMkt(response);
+            saveJson(result, response.getMarket().getMkt());
+            return response.getImages();
+        }).flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    private static void saveJson(String result, String mkt) {
+        String dirPath = "./resources/json/" + mkt + File.separator;
+        File file = new File(dirPath + LocalDateTime.now() + ".json");
+        FileUtil.writeString(result, file, Charset.defaultCharset());
+    }
+
+}
