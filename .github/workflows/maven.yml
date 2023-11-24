@@ -29,6 +29,7 @@ jobs:
       run: |
          git config --local user.email "tongjiann@gmail.com"
          git config --local user.name "xiw"
+         git checkout json
          git add resources/json/*
          git commit -m "update json"
     - name: Push changes
@@ -40,8 +41,9 @@ jobs:
       run: |
          git config --local user.email "tongjiann@gmail.com"
          git config --local user.name "xiw"
+         git checkout pic
          git add resources/uhd/*
-         git commit -m "update json"
+         git commit -m "update pic"
     - name: Push changes
       uses:  ad-m/github-push-action@master
       with:
