@@ -1,0 +1,49 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven
+
+on:
+  workflow_dispatch:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 9 * * *'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3.13.0
+      with:
+        java-version: '17'
+        distribution: 'zulu'
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+    - name: Run Java Application
+      run:  java -jar target/bing-wallpaper-jar-with-dependencies.jar
+    - name: Commit json files
+      run: |
+         git config --local user.email "tongjiann@gmail.com"
+         git config --local user.name "xiw"
+         git add resources/json/*
+         git commit -m "update json"
+    - name: Push changes
+      uses:  ad-m/github-push-action@master
+      with:
+         github_token: ${{ secrets.MY_GIT_TOKEN }}
+         branch: json
+    - name: Commit pic files
+      run: |
+         git config --local user.email "tongjiann@gmail.com"
+         git config --local user.name "xiw"
+         git add resources/json/*
+         git commit -m "update json"
+    - name: Push changes
+      uses:  ad-m/github-push-action@master
+      with:
+         github_token: ${{ secrets.MY_GIT_TOKEN }}
+         branch: pic
