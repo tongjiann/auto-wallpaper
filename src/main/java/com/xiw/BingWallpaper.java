@@ -96,4 +96,5 @@ public class BingWallpaper {
         FileUtil.writeString(result, file, Charset.defaultCharset());
     }
 
+
 }
