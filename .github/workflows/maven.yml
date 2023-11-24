@@ -40,7 +40,7 @@ jobs:
       run: |
          git config --local user.email "tongjiann@gmail.com"
          git config --local user.name "xiw"
-         git add resources/json/*
+         git add resources/uhd/*
          git commit -m "update json"
     - name: Push changes
       uses:  ad-m/github-push-action@master
