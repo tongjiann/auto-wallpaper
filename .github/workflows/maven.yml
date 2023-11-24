@@ -25,27 +25,14 @@ jobs:
       run: mvn -B package --file pom.xml
     - name: Run Java Application
       run:  java -jar target/bing-wallpaper-jar-with-dependencies.jar
-    - name: Commit json files
+    - name: Commit files
       run: |
          git config --local user.email "tongjiann@gmail.com"
          git config --local user.name "xiw"
-         git checkout 'json'
-         git add resources/json/*
-         git commit -m "update json"
+         git add .
+         git commit -m "upload resources"
     - name: Push changes
       uses:  ad-m/github-push-action@master
       with:
          github_token: ${{ secrets.MY_GIT_TOKEN }}
-         branch: json
-    - name: Commit pic files
-      run: |
-         git config --local user.email "tongjiann@gmail.com"
-         git config --local user.name "xiw"
-         git checkout 'pic'
-         git add resources/uhd/*
-         git commit -m "update pic"
-    - name: Push changes
-      uses:  ad-m/github-push-action@master
-      with:
-         github_token: ${{ secrets.MY_GIT_TOKEN }}
-         branch: pic
+         branch: main
