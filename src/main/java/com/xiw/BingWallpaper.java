@@ -9,11 +9,9 @@ import com.xiw.bean.Response;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BingWallpaper {
@@ -58,10 +56,13 @@ public class BingWallpaper {
     private static File getFile(Image image) {
         String fileName = CharSequenceUtil.format("{}_{}.jpg", image.getEnddate(), image.getUrlbase()
                 .split("th\\?id=OHR.")[1]);
-        String mkt = image.getMkt();
-        String dirPath = "./resources/uhd/" + mkt + File.separator;
-        File file = new File(dirPath + fileName);
-        return file;
+        String dirPath = "./resources/uhd/";
+        if ("zh-cn".equals(image.getMkt().toLowerCase(Locale.getDefault()))) {
+            dirPath = dirPath + "normal" + File.separator;
+        } else {
+            dirPath = dirPath + "special" + File.separator;
+        }
+        return new File(dirPath + fileName);
     }
 
     private static void setMkt(Response response) {
@@ -72,8 +73,9 @@ public class BingWallpaper {
     private static List<String> buildUrlList() {
         List<String> urlList = new ArrayList<>();
         AREA_LIST.forEach(area -> {
-            String url = "https://www.bing.com/HPImageArchive.aspx?format=js&pid=hp&og=1&idx=0&n=8&&mbl=1&cc=" + area;
-            urlList.add(url);
+            urlList.add("https://www.bing.com/HPImageArchive.aspx?format=js&pid=hp&og=1&idx=0&n=8&&mbl=1&cc=" + area);
+            urlList.add("https://www.bing.com/HPImageArchive.aspx?format=js&pid=hp&og=1&idx=7&n=8&&mbl=1&cc=" + area);
+            // urlList.add("https://www.bing.com/HPImageArchive.aspx?format=js&pid=hp&og=1&idx=7&n=8&&mbl=1&cc=" + area);
         });
         return urlList;
     }
@@ -90,9 +92,10 @@ public class BingWallpaper {
     }
 
     private static void saveJson(String result, String mkt) {
-        String dirPath = "./resources/json/" + mkt + File.separator;
-        File file = new File(dirPath + LocalDateTime.now() + ".json");
+        String dirPath = "./resources/json/" + LocalDate.now() + File.separator;
+        File file = new File(dirPath + LocalDateTime.now() + "_" + mkt + ".json");
         FileUtil.writeString(result, file, Charset.defaultCharset());
     }
 
 }
+
