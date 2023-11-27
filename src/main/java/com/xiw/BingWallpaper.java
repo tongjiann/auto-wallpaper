@@ -75,6 +75,7 @@ public class BingWallpaper {
         AREA_LIST.forEach(area -> {
             urlList.add("https://www.bing.com/HPImageArchive.aspx?format=js&pid=hp&og=1&idx=0&n=8&&mbl=1&cc=" + area);
             urlList.add("https://www.bing.com/HPImageArchive.aspx?format=js&pid=hp&og=1&idx=7&n=8&&mbl=1&cc=" + area);
+            // urlList.add("https://www.bing.com/HPImageArchive.aspx?format=js&pid=hp&og=1&idx=7&n=8&&mbl=1&cc=" + area);
         });
         return urlList;
     }
@@ -96,5 +97,5 @@ public class BingWallpaper {
         FileUtil.writeString(result, file, Charset.defaultCharset());
     }
 
-
 }
+
