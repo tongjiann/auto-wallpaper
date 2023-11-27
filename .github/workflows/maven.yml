@@ -29,7 +29,7 @@ jobs:
          git config --local user.email "tongjiann@gmail.com"
          git config --local user.name "xiw"
          git add .
-        git commit -m "upload resources"
+         git commit -m "upload resources"
     - name: Push changes
       uses:  ad-m/github-push-action@master
       with:
