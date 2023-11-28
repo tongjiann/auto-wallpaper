@@ -27,9 +27,9 @@ jobs:
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       with:
-        commit-message: update authors
-        title: date
-        body: Credit new contributors by updating AUTHORS
+        commit-message: update resources
+        title: update resources
+        body: update resources
         branch: ${{ github.run_id }}
         base: pic
 
