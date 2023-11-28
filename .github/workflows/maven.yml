@@ -24,16 +24,14 @@ jobs:
       run: mvn -B package --file pom.xml
     - name: Run Java Application
       run:  java -jar target/bing-wallpaper-jar-with-dependencies.jar
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
+    - name: Commit files
+      run: |
+         git config --local user.email "tongjiann@gmail.com"
+         git config --local user.name "xiw"
+         git add .
+         git commit -m "upload resources"
+    - name: Push changes
+      uses:  ad-m/github-push-action@master
       with:
-        commit-message: update resources
-        title: update resources
-        body: update resources
-        branch: ${{ github.run_id }}
-        base: pic
-
-    - name: Enable Pull Request Automerge
-      run: gh pr merge --merge --auto "${PULL_REQUEST_NUMBER}"
-      env:
-        GH_TOKEN: ${{ secrets.PAT }}
+         github_token: ${{ secrets.MY_GIT_TOKEN }}
+         branch: main
