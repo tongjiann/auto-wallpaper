@@ -37,4 +37,6 @@ public class Image {
 
     private String mkt;
 
+    private String urlName;
+
 }
