@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class BingWallpaper {
@@ -26,7 +27,11 @@ public class BingWallpaper {
     }
 
     private static void downloadImages(List<Image> allImages) {
-        allImages.stream().filter(BingWallpaper::filterImage).forEach(image -> {
+        allImages.stream()
+                .filter(BingWallpaper::filterImage)
+                .collect(Collectors.toMap(Image::getUrlName, Function.identity(), (x, y) -> x))
+                .values()
+                .forEach(image -> {
             File file = getFile(image);
             String url = getUHDUrl(image);
             System.out.println("download:" + file.getName());
@@ -35,9 +40,19 @@ public class BingWallpaper {
     }
 
     private static boolean filterImage(Image image) {
-        boolean isSpecial = !image.isWp() || "zh-CN".equals(image.getMkt());
-        boolean isExist = getFile(image).exists();
-        return isSpecial && !isExist;
+        boolean isZhMkt = "zh-CN".equals(image.getMkt());
+        boolean needDownload = !image.isWp() || isZhMkt;
+        if (!needDownload) {
+            return false;
+        }
+        String subDir;
+        if (isZhMkt) {
+            subDir = "normal";
+        } else {
+            subDir = "special";
+        }
+        boolean isExist = FileUtil.exist("./resources/uhd/" + subDir + File.separator, ".*?" + image.getUrlName() + ".*?");
+        return !isExist;
     }
 
     private static void doDownload(File file, String url) {
@@ -65,9 +80,12 @@ public class BingWallpaper {
         return new File(dirPath + fileName);
     }
 
-    private static void setMkt(Response response) {
+    private static void setExtraInfo(Response response) {
         String mkt = response.getMarket().getMkt();
-        response.getImages().forEach(e -> e.setMkt(mkt));
+        response.getImages().forEach(e -> {
+            e.setMkt(mkt);
+            e.setUrlName(e.getUrlbase().split("th\\?id=OHR.")[1].split("_")[0]);
+        });
     }
 
     private static List<String> buildUrlList() {
@@ -85,7 +103,7 @@ public class BingWallpaper {
         return urlList.stream().map(url -> {
             String result = HttpUtil.get(url);
             Response response = JSONUtil.toBean(result, Response.class);
-            setMkt(response);
+            setExtraInfo(response);
             saveJson(result, response.getMarket().getMkt());
             return response.getImages();
         }).flatMap(Collection::stream).collect(Collectors.toList());
